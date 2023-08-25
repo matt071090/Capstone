@@ -53,8 +53,7 @@ usernameG = [{'username':'Default',
               'privileges':'Default'}]
 runningNumber=0
 ctrlogin = 1
-sorting = 0
-harga = 0
+harga = 'Default'
 cache = 'Default'
 def if_exist(listcheck):
     if len(listcheck) != len(set(listcheck)):
@@ -94,13 +93,13 @@ def readMobil(any,sorting,harga) :
             break
     else :
         print('=================List Mobil Auto Rental=================')
-        if sorting == 'Brand' :
+        if cache == 'Brand' :
             orderlist=sorted(listMobil, key=lambda d: d[cache])
             header = orderlist[0].keys()
             rows =  [x.values() for x in orderlist]
             print(tabulate.tabulate(rows, header,tablefmt='rst'))
             orderlist.clear()
-        elif sorting == 'Harga' :
+        elif cache == 'Harga/malam' :
             if harga == 'Tertinggi' :
                 orderlist=sorted(listMobil, key=lambda d: d[cache],reverse=True)
                 header = orderlist[0].keys()
@@ -169,7 +168,7 @@ def deletemobil(x) :
 def addItem() :
     pilih1=pyip.inputMenu(['Tambah Brand Baru','Tambah mobil baru'],prompt='Pilih salah 1\n',numbered=True)
     if pilih1 == 'Tambah mobil baru' :
-        readMobil(mainMenu,sorting,harga)
+        readMobil(mainMenu,cache,harga)
         grabnoPol(mainMenu)
         while True:
             brandMobil = pyip.inputMenu(brand,numbered=True,prompt='Pilih brand Mobil\n')
@@ -232,8 +231,8 @@ while True :
                     addItem()
                 elif mainMenu == 'Menampilkan Item Master Data' :
                     while True :
-                        readMobil(mainMenu,sorting,harga)
-                        menuRead = pyip.inputMenu(['Brand','PlatNomor','Harga'],prompt='urutkan data dengan:\n',numbered=True)
+                        readMobil(mainMenu,cache,harga)
+                        menuRead = pyip.inputMenu(['Brand','PlatNomor','Harga/malam'],prompt='urutkan data dengan:\n',numbered=True)
                         if menuRead == 'Brand' :
                             cache = 'Brand'
                             readMobil(mainMenu,menuRead,harga)
@@ -253,9 +252,9 @@ while True :
                 elif mainMenu == 'Update Item Master Data' :
                     grabnoPol(mainMenu)
                     while True :
-                        readMobil(mainMenu,sorting,harga)
+                        readMobil(mainMenu,cache,harga)
                         updateChoice=pyip.inputMenu(['Harga/Malam','Tersedia','Semua'],numbered=True,prompt='Pilih content yang ingin di update :\n')
-                        readMobil(mainMenu,sorting,harga)
+                        readMobil(mainMenu,cache,harga)
                         noPol = pyip.inputMenu(prompt='Pilih noPol untuk di update :\n',choices=listNopol,numbered=True)
                         if updateChoice == 'Harga/Malam' : 
                             getIndex = next((i for (i, d) in enumerate(listMobil) if d['PlatNomor'] == noPol), None) 
@@ -343,7 +342,7 @@ while True :
                     disc = 0
                     nama=pyip.inputStr(prompt='masukkan Nama Pemesan: ', blockRegexes=[(r"[0-9]")])
                     while True :
-                        readMobil(mainMenu,sorting,harga)
+                        readMobil(mainMenu,cache,harga)
                         grabnoPol(mainMenu)
                         if len(listNopol) != 0 :
                             orderCheck=pyip.inputMenu(['Ya','Tidak'],prompt='Mulai order mobil ke-{}\n'.format(counter),numbered=True)
