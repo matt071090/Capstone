@@ -14,7 +14,7 @@ listMobil =[
      {
         'Brand' : 'Toyota',
         'Tipe' : 'Avanza',
-        'PlatNomor' : 'B123DEF',
+        'PlatNomor' : 'B456DEF',
         'Harga/malam' : 475000,
         'Tersedia' : 'Tidak'
     },
@@ -28,7 +28,7 @@ listMobil =[
     {
         'Brand' : 'Honda',
         'Tipe' : 'Brio   ',
-        'PlatNomor' : 'B456DEF',
+        'PlatNomor' : 'B123DEF',
         'Harga/malam' : 385000,
         'Tersedia' : 'Ya'
     },
@@ -55,6 +55,7 @@ runningNumber=0
 ctrlogin = 1
 sorting = 0
 harga = 0
+cache = 'Default'
 def if_exist(listcheck):
     if len(listcheck) != len(set(listcheck)):
         return True
@@ -84,7 +85,7 @@ def readMobil(any,sorting,harga) :
                         })
                 else :
                     continue
-            orderlist=sorted(orderlist, key=lambda d: d['PlatNomor'])
+            orderlist=sorted(orderlist, key=lambda d: d[cache])
             print('===========List Mobil Auto Rental===========')
             header = orderlist[0].keys()
             rows =  [x.values() for x in orderlist]
@@ -94,30 +95,41 @@ def readMobil(any,sorting,harga) :
     else :
         print('=================List Mobil Auto Rental=================')
         if sorting == 'Brand' :
-            orderlist=sorted(listMobil, key=lambda d: d['Brand'])
+            orderlist=sorted(listMobil, key=lambda d: d[cache])
             header = orderlist[0].keys()
             rows =  [x.values() for x in orderlist]
             print(tabulate.tabulate(rows, header,tablefmt='rst'))
             orderlist.clear()
         elif sorting == 'Harga' :
             if harga == 'Tertinggi' :
-                orderlist=sorted(listMobil, key=lambda d: d['Harga/malam'],reverse=True)
+                orderlist=sorted(listMobil, key=lambda d: d[cache],reverse=True)
                 header = orderlist[0].keys()
                 rows =  [x.values() for x in orderlist]
                 print(tabulate.tabulate(rows, header,tablefmt='rst'))
                 orderlist.clear()
             else : 
-                orderlist=sorted(listMobil, key=lambda d: d['Harga/malam'],reverse=False)
+                orderlist=sorted(listMobil, key=lambda d: d[cache],reverse=False)
                 header = orderlist[0].keys()
                 rows =  [x.values() for x in orderlist]
                 print(tabulate.tabulate(rows, header,tablefmt='rst'))
                 orderlist.clear()
-        else :
-            orderlist=sorted(listMobil, key=lambda d: d['PlatNomor'])
+        elif sorting=='PlatNomor' :
+            orderlist=sorted(listMobil, key=lambda d: d[cache])
             header = orderlist[0].keys()
             rows =  [x.values() for x in orderlist]
             print(tabulate.tabulate(rows, header,tablefmt='rst'))
             orderlist.clear()
+        else :
+            if cache == 'Default':
+                header = listMobil[0].keys()
+                rows =  [x.values() for x in listMobil]
+                print(tabulate.tabulate(rows, header,tablefmt='rst'))
+            else :
+                orderlist=sorted(listMobil, key=lambda d: d[cache])
+                header = orderlist[0].keys()
+                rows =  [x.values() for x in orderlist]
+                print(tabulate.tabulate(rows, header,tablefmt='rst'))
+                orderlist.clear()
 def orderDraft(anylist,disc,x,y) :
     subtotal= 0
     tglPesan = date.today()
@@ -221,13 +233,16 @@ while True :
                 elif mainMenu == 'Menampilkan Item Master Data' :
                     while True :
                         readMobil(mainMenu,sorting,harga)
-                        menuRead = pyip.inputMenu(['Brand','Nopol','Harga'],prompt='urutkan data dengan:\n',numbered=True)
+                        menuRead = pyip.inputMenu(['Brand','PlatNomor','Harga'],prompt='urutkan data dengan:\n',numbered=True)
                         if menuRead == 'Brand' :
+                            cache = 'Brand'
                             readMobil(mainMenu,menuRead,harga)
-                        elif menuRead == 'Nopol' :
+                        elif menuRead == 'PlatNomor' :
+                            cache = 'PlatNomor'
                             readMobil(mainMenu,menuRead,harga)
                         else :
                             harga=pyip.inputMenu(['Tertinggi','Terendah'],prompt='sort harga dari:\n',numbered=True)
+                            cache = 'Harga/malam'
                             readMobil(mainMenu,menuRead,harga)
                         pilih=pyip.inputMenu(['Kembali','Lanjut(read)'],prompt='Anda ingin kembali ke main menu?\n',numbered=True)
                         if pilih == 'Kembali' :
