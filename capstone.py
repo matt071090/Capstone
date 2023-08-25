@@ -70,7 +70,7 @@ def grabnoPol(check):
                 listNopol.append(listMobil[i]['PlatNomor'])
             else :
                 continue        
-def readMobil(any,sorting,harga) :
+def readMobil(any,cache,harga) :
     orderlist=[]
     if any == 'Proses Booking' :
         while True :
@@ -84,13 +84,16 @@ def readMobil(any,sorting,harga) :
                         })
                 else :
                     continue
-            orderlist=sorted(orderlist, key=lambda d: d[cache])
-            print('===========List Mobil Auto Rental===========')
-            header = orderlist[0].keys()
-            rows =  [x.values() for x in orderlist]
-            print(tabulate.tabulate(rows, header,tablefmt='rst'))
-            orderlist.clear()
-            break
+            if len(orderlist) > 0 :
+                print('===========List Mobil Auto Rental===========')
+                header = orderlist[0].keys()
+                rows =  [x.values() for x in orderlist]
+                print(tabulate.tabulate(rows, header,tablefmt='rst'))
+                orderlist.clear()
+                break
+            else :
+                print('Tidak ada data yang bisa di tampilkan')
+                break
     else :
         print('=================List Mobil Auto Rental=================')
         if cache == 'Brand' :
@@ -112,7 +115,7 @@ def readMobil(any,sorting,harga) :
                 rows =  [x.values() for x in orderlist]
                 print(tabulate.tabulate(rows, header,tablefmt='rst'))
                 orderlist.clear()
-        elif sorting=='PlatNomor' :
+        elif cache=='PlatNomor' :
             orderlist=sorted(listMobil, key=lambda d: d[cache])
             header = orderlist[0].keys()
             rows =  [x.values() for x in orderlist]
@@ -173,7 +176,7 @@ def addItem() :
         while True:
             brandMobil = pyip.inputMenu(brand,numbered=True,prompt='Pilih brand Mobil\n')
             tipeMobil = input('Masukan Tipe Mobil :').title()
-            noPolMobil = pyip.inputRegex(r'[a-zA-Z]{1,2}[0-9]{3}[A-Za-z]*',prompt='Masukan PlatNomor :').upper()
+            noPolMobil = pyip.inputRegex(r'[a-zA-Z]{1,2}\d{3}[A-Za-z]*',prompt='Masukan PlatNomor :').upper()
             listNopol.append(noPolMobil)
             if if_exist(listNopol) :
                     print('Nopol {} sudah ada dalam sistem, silahkan masukan value lain'.format(noPolMobil))
@@ -287,11 +290,11 @@ while True :
                         else :
                             continue
                 elif mainMenu == 'Delete Item Master data' :
+                    ctr=1
                     while True :
-                        ctr=1
                         if usernameG[0]['privileges'] == 'SUP' :
                             grabnoPol(mainMenu)
-                            noPol = pyip.inputRegex(r'[a-zA-Z]{1,2}[0-9]{3}[a-zA-Z]*',prompt='Pilih nopol yang ingin didelete {}:'.format(listNopol)).upper()
+                            noPol = pyip.inputRegex(r'[a-zA-Z]{1,2}\d{3}[a-zA-Z]*',prompt='Pilih nopol yang ingin didelete {}:'.format(listNopol)).upper()
                             deletemobil(noPol)
                             pilih=pyip.inputMenu(choices=['Kembali','Lanjut(Delete)'],numbered=True)
                             if pilih == 'Kembali' :
@@ -312,7 +315,7 @@ while True :
                                 password=pyip.inputPassword('Butuh Otorisasi Manager,percobaan ke-{}:'.format(ctr))
                                 if password == listUser[1]['password'] :
                                     grabnoPol(mainMenu)
-                                    noPol = pyip.inputRegex(r'[a-zA-Z]{1,2}[0-9]{3}[a-zA-Z]*',prompt='Pilih nopol yang ingin didelete {}:'.format(listNopol)).upper()
+                                    noPol = pyip.inputRegex(r'[a-zA-Z]{1,2}\d{3}[a-zA-Z]*',prompt='Pilih nopol yang ingin didelete {}:'.format(listNopol)).upper()
                                     deletemobil(noPol)
                                     pilih=pyip.inputMenu(choices=['Kembali','Lanjut(Delete)'],numbered=True)
                                     if pilih == 'Kembali' :
@@ -333,8 +336,8 @@ while True :
                                     ctr +=1
                                     continue
                             else :
-                                print('Terlalu banyak kesalahan terminate program')
-                                quit()
+                                print('Terlalu banyak kesalahan melanjutkan ke step berikut-nya')
+                                break
                 elif mainMenu == 'Proses Booking':
                     counter = 1
                     ordermobil= []
@@ -344,7 +347,7 @@ while True :
                     while True :
                         readMobil(mainMenu,cache,harga)
                         grabnoPol(mainMenu)
-                        if len(listNopol) != 0 :
+                        if len(ordermobil) < len(listMobil) and listNopol!=0 :
                             orderCheck=pyip.inputMenu(['Ya','Tidak'],prompt='Mulai order mobil ke-{}\n'.format(counter),numbered=True)
                             if orderCheck == 'Ya' and len(listNopol) > 0 :
                                 while True :
@@ -355,12 +358,12 @@ while True :
                                     else :
                                         break
                                 while True :
-                                    while True :
-                                        dari=pyip.inputDate(prompt='Dari tanggal [mm/dd/yyyy]:')
-                                        if dari <date.today() :
-                                            print('Masukan tanggal lebih besar dari {}'.format(date.today()))
-                                        else :
-                                            break
+                                    dari=pyip.inputDate(prompt='Dari tanggal [mm/dd/yyyy]:')
+                                    if dari <date.today() :
+                                        print('Masukan tanggal lebih besar dari {}'.format(date.today()))
+                                    else :
+                                        break
+                                while True :
                                     sampai=pyip.inputDate(prompt='Sampai tanggal [mm/dd/yyyy]:')
                                     if sampai > dari :
                                         if str(sampai-dari) == '1 day, 0:00:00' :
@@ -381,9 +384,9 @@ while True :
                                             listMobil[getIndex].update({'Tersedia' : 'Tidak'})
                                             counter+=1
                                             listNopol.clear()
+                                            break
                                         else : 
                                             continue
-                                        break
                                     else :
                                         print('Tanggal sampai tidak boleh lebih kecil dari tanggal dari')
                                         continue
@@ -399,9 +402,10 @@ while True :
                                         ordermobil.clear()
                                         listNopol.clear()
                                         runningNumber+=1
+                                        break
                                     else :
+                                        ctr =1
                                         while True :
-                                            ctr =1
                                             if ctr<=3 :
                                                 password=pyip.inputPassword('Butuh Otorisasi Manager,percobaan ke-{}:'.format(ctr))
                                                 if password == listUser[1]['password'] :
@@ -417,15 +421,19 @@ while True :
                                                     ctr +=1
                                                     continue
                                             else :
-                                                print('Terlalu banyak kesalahan terminate program')
-                                                quit()   
+                                                print('Terlalu banyak kesalahan lanjut ke proses berikut-nya')
+                                                orderDraft(ordermobil,disc1,nama,runningNumber)
+                                                ordermobil.clear()
+                                                runningNumber+=1
+                                                listNopol.clear()
+                                                break   
                                 else :
                                     print('\nTerima kasih pesanan anda telah di finalisasi')
                                     orderDraft(ordermobil,disc,nama,runningNumber)
                                     runningNumber+=1
                                     listNopol.clear()
                                     ordermobil.clear()
-                                break
+                                    break
                             elif orderCheck == 'Ya' and len(listNopol) == 0 :
                                 print('Tidak ada lagi mobil yang tersedia, berikut detail pemesanan anda\n')
                                 orderDraft(ordermobil,disc,nama,runningNumber)
@@ -439,8 +447,8 @@ while True :
                                         listNopol.clear()
                                         runningNumber+=1
                                     else :
+                                        ctr =1
                                         while True :
-                                            ctr =1
                                             if ctr<=3 :
                                                 password=pyip.inputPassword('Butuh Otorisasi Manager,percobaan ke-{}:'.format(ctr))
                                                 if password == listUser[1]['password'] :
@@ -456,8 +464,12 @@ while True :
                                                     ctr +=1
                                                     continue
                                             else :
-                                                print('Terlalu banyak kesalahan terminate program')
-                                                quit()
+                                                print('Terlalu banyak kesalahan lanjut ke proses berikutnya')
+                                                orderDraft(ordermobil,disc,nama,runningNumber)
+                                                ordermobil.clear()
+                                                runningNumber+=1
+                                                listNopol.clear()
+                                                break
                                 else :
                                     print('\nTerima kasih pesanan anda telah di finalisasi')
                                     orderDraft(ordermobil,disc,nama,runningNumber)
@@ -488,8 +500,8 @@ while True :
                                     ctr +=1
                                     continue
                             else :
-                                print('Terlalu banyak kesalahan, program dipaksa berhenti')
-                                quit()
+                                print('Terlalu banyak kesalahan,kembali ke menu utama')
+                                break
                     else :
                         print('Tidak ada data dalam bin')
                 else:
